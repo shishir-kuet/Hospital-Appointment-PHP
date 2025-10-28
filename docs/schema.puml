@@ -1,0 +1,121 @@
+@startuml Schema_Diagram
+package "Hospital Schema" {
+class users {
++int id <<PK>>
++varchar first_name
++varchar last_name
++varchar email
++varchar phone
++varchar password
++varchar role
++timestamp created_at
++tinyint is_active
+}
+
+class patients {
++int user_id <<PK, FK users.id>>
++int age
++varchar blood_group
++text address
++text medical_history
++timestamp created_at
+}
+
+class doctors {
++int id <<PK>>
++int user_id <<FK users.id>>
++int department_id <<FK departments.id>>
++varchar specialization
++decimal consultation_fee
++int experience_years
++text bio
++decimal rating
++varchar available_days
++time start_time
++time end_time
++tinyint is_available
++int min_age
++int max_age
++varchar preferred_blood_groups
++timestamp created_at
+}
+
+class departments {
++int id <<PK>>
++varchar name
++text description
++tinyint is_active
++varchar age_group
+}
+
+class appointments {
++int id <<PK>>
++varchar appointment_number
++int patient_id <<FK users.id>>
++int doctor_id <<FK doctors.id>>
++date appointment_date
++time appointment_time
++varchar status
++text reason_for_visit
++timestamp created_at
+}
+
+class bills {
++int id <<PK>>
++varchar bill_number
++int appointment_id <<FK appointments.id>>
++int patient_id <<FK users.id>>
++decimal consultation_fee
++decimal additional_charges
++decimal discount_amount
++decimal total_amount
++varchar payment_status
++date due_date
++timestamp created_at
+}
+
+class doctor_schedules {
++int id <<PK>>
++int doctor_id <<FK doctors.id>>
++varchar day_of_week
++time start_time
++time end_time
++tinyint is_available
++int slot_duration_minutes
++timestamp created_at
++timestamp updated_at
+}
+
+class doctor_leaves {
++int id <<PK>>
++int doctor_id <<FK doctors.id>>
++date leave_date
++varchar reason
++timestamp created_at
+}
+
+class doctor_reviews {
++int id <<PK>>
++int doctor_id <<FK doctors.id>>
++int patient_id <<FK users.id>>
++int appointment_id <<FK appointments.id>>
++int rating
++text review_text
++varchar patient_name
++timestamp created_at
+}
+}
+
+' Associations (connect classes)
+users "1" -- "0..1" patients
+users "1" -- "0..1" doctors
+departments "1" -- "0..*" doctors
+doctors "1" -- "0..*" appointments
+users "1" -- "0..*" appointments : as_patient
+appointments "1" -- "0..1" bills
+users "1" -- "0..*" bills : as_patient
+doctors "1" -- "0..*" doctor_schedules
+doctors "1" -- "0..*" doctor_leaves
+doctors "1" -- "0..*" doctor_reviews
+users "1" -- "0..*" doctor_reviews : as_patient
+@enduml

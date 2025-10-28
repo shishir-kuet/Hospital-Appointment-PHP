@@ -1,0 +1,166 @@
+@startuml ER_Diagram
+'hide circle
+skinparam {
+	entity {
+		BackgroundColor #E6F7FF
+		BorderColor #7FBFEF
+		FontColor #0f172a
+	}
+}
+' Entities
+entity "users" as users #E6F7FF {
+* id : INT <<PK>>
+first_name : VARCHAR
+last_name : VARCHAR
+email : VARCHAR
+phone : VARCHAR
+password : VARCHAR
+role : VARCHAR
+created_at : TIMESTAMP
+is_active : TINYINT
+}
+
+entity "patients" as patients #E6F7FF {
+* user_id : INT <<PK,FK users.id>>
+age : INT
+blood_group : VARCHAR
+address : TEXT
+medical_history : TEXT
+created_at : TIMESTAMP
+}
+
+entity "doctors" as doctors #E6F7FF {
+* id : INT <<PK>>
+user_id : INT <<FK users.id>>
+department_id : INT <<FK departments.id>>
+specialization : VARCHAR
+consultation_fee : DECIMAL
+experience_years : INT
+bio : TEXT
+rating : DECIMAL
+available_days : VARCHAR
+start_time : TIME
+end_time : TIME
+is_available : TINYINT
+min_age : INT
+max_age : INT
+preferred_blood_groups : VARCHAR
+created_at : TIMESTAMP
+}
+
+entity "departments" as departments #E6F7FF {
+* id : INT <<PK>>
+name : VARCHAR
+description : TEXT
+is_active : TINYINT
+age_group : VARCHAR
+}
+
+entity "appointments" as appointments #E6F7FF {
+* id : INT <<PK>>
+appointment_number : VARCHAR
+patient_id : INT <<FK users.id>>
+doctor_id : INT <<FK doctors.id>>
+appointment_date : DATE
+appointment_time : TIME
+status : VARCHAR
+reason_for_visit : TEXT
+created_at : TIMESTAMP
+}
+
+entity "bills" as bills #E6F7FF {
+* id : INT <<PK>>
+bill_number : VARCHAR
+appointment_id : INT <<FK appointments.id>>
+patient_id : INT <<FK users.id>>
+consultation_fee : DECIMAL
+additional_charges : DECIMAL
+discount_amount : DECIMAL
+total_amount : DECIMAL
+payment_status : VARCHAR
+due_date : DATE
+created_at : TIMESTAMP
+}
+
+entity "doctor_schedules" as schedules #E6F7FF {
+* id : INT <<PK>>
+doctor_id : INT <<FK doctors.id>>
+day_of_week : VARCHAR
+start_time : TIME
+end_time : TIME
+is_available : TINYINT
+slot_duration_minutes : INT
+created_at : TIMESTAMP
+updated_at : TIMESTAMP
+}
+
+entity "doctor_leaves" as leaves #E6F7FF {
+* id : INT <<PK>>
+doctor_id : INT <<FK doctors.id>>
+leave_date : DATE
+reason : VARCHAR
+created_at : TIMESTAMP
+}
+
+entity "doctor_reviews" as reviews #E6F7FF {
+* id : INT <<PK>>
+doctor_id : INT <<FK doctors.id>>
+patient_id : INT <<FK users.id>>
+appointment_id : INT <<FK appointments.id>>
+rating : INT
+review_text : TEXT
+patient_name : VARCHAR
+created_at : TIMESTAMP
+}
+
+'' Relationships
+class Receives #FFB000 {
+}
+users "1" -- Receives
+Receives -- "0..1" patients
+
+class LinkedTo #FFB000 {
+}
+users "1" -- LinkedTo
+LinkedTo -- "0..1" doctors
+
+class Manages #FFB000 {
+}
+departments "1" -- Manages
+Manages -- "0..*" doctors
+
+class Schedules #FFB000 {
+}
+doctors "1" -- Schedules
+Schedules -- "0..*" appointments
+
+class Generates #FFB000 {
+}
+appointments "1" -- Generates
+Generates -- "0..1" bills
+
+class Owes #FFB000 {
+}
+users "1" -- Owes
+Owes -- "0..*" bills
+
+class HasSchedule #FFB000 {
+}
+doctors "1" -- HasSchedule
+HasSchedule -- "0..*" schedules
+
+class TakesLeave #FFB000 {
+}
+doctors "1" -- TakesLeave
+TakesLeave -- "0..*" leaves
+
+class ReviewedBy #FFB000 {
+}
+doctors "1" -- ReviewedBy
+ReviewedBy -- "0..*" reviews
+
+class Reviews #FFB000 {
+}
+users "1" -- Reviews
+Reviews -- "0..*" reviews
+@enduml

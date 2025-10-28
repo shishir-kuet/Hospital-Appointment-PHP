@@ -365,8 +365,40 @@ $dept_stats = $db->fetchAll($dept_stats_sql);
             <!-- Recent Appointments -->
             <div class="card">
                 <div class="px-6 py-4 border-b flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Recent Appointments</h3>
+                    <div class="flex items-center">
+                        <h3 class="text-lg font-semibold text-gray-800">Recent Appointments</h3>
+                        <button onclick="showSqlQuery()" class="ml-2 text-blue-500 hover:text-blue-700" title="Show SQL Query">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
                     <a href="all-appointments.php" class="text-sm text-blue-600 hover:text-blue-800">View All</a>
+                </div>
+                <!-- SQL Query Modal -->
+                <div id="sqlModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                    <div class="bg-white p-6 rounded-lg shadow-xl max-w-4xl w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-semibold">SQL Query</h4>
+                            <button onclick="hideSqlQuery()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <pre class="bg-gray-50 p-4 rounded overflow-x-auto text-sm">SELECT 
+    a.*,
+    p_user.first_name as patient_first_name,
+    p_user.last_name as patient_last_name,
+    d_user.first_name as doctor_first_name,
+    d_user.last_name as doctor_last_name,
+    doc.specialization,
+    dept.name as department_name
+FROM appointments a
+INNER JOIN patients pat ON a.patient_id = pat.user_id
+INNER JOIN users p_user ON pat.user_id = p_user.id
+INNER JOIN doctors doc ON a.doctor_id = doc.id
+INNER JOIN users d_user ON doc.user_id = d_user.id
+INNER JOIN departments dept ON doc.department_id = dept.id
+ORDER BY a.created_at DESC
+LIMIT 10</pre>
+                    </div>
                 </div>
                 <div class="p-6">
                     <?php if (empty($recent_appointments)): ?>
@@ -533,6 +565,26 @@ $dept_stats = $db->fetchAll($dept_stats_sql);
     </div>
 
     <script>
+        // SQL Query Modal Functions
+        function showSqlQuery() {
+            const modal = document.getElementById('sqlModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function hideSqlQuery() {
+            const modal = document.getElementById('sqlModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('sqlModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideSqlQuery();
+            }
+        });
+
         // Add real-time clock
         function updateClock() {
             const now = new Date();
